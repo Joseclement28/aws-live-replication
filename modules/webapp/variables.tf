@@ -10,5 +10,5 @@ variable "key_name" {}
 variable "private_ip" {}
 
 variable "ebs_size" {
-  default = 500
+  default = 30
 }
