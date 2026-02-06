@@ -87,20 +87,18 @@ resource "aws_instance" "this" {
 
   user_data = <<-EOF
               #!/bin/bash
-              set -xe
+              set -euxo pipefail
+              exec > /var/log/user-data.log 2>&1
+
+              sleep 30
 
               apt update -y
 
-              # Install Java
-              apt install -y openjdk-11-jdk
+              apt install -y openjdk-17-jdk tomcat10 tomcat10-admin mysql-server
 
-              # Install Tomcat
-              apt install -y tomcat9 tomcat9-admin
-              systemctl start tomcat9
-              systemctl enable tomcat9
+              systemctl start tomcat10
+              systemctl enable tomcat10
 
-              # Install MySQL
-              apt install -y mysql-server
               systemctl start mysql
               systemctl enable mysql
               EOF
