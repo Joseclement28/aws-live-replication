@@ -13,7 +13,7 @@ module "webapp" {
   instance_name = "ec2-1"
   ami_id        = "ami-0f5ee92e2d63afc18"
   instance_type = "t3.micro"
-  key_name      = "free-account"
+  key_name      = "production"
   private_ip    = "192.168.10.100"
 
   ebs_size      = 500
