@@ -16,5 +16,5 @@ module "webapp" {
   key_name      = "production"
   private_ip    = "192.168.10.100"
 
-  ebs_size      = 500
+  ebs_size      = 30
 }
