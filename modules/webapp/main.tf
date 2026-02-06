@@ -87,22 +87,22 @@ resource "aws_instance" "this" {
 
   user_data = <<-EOF
               #!/bin/bash
-              yum update -y
+              set -xe
+
+              apt update -y
 
               # Install Java
-              yum install -y java-11-openjdk
+              apt install -y openjdk-11-jdk
 
               # Install Tomcat
-              cd /opt
-              wget https://downloads.apache.org/tomcat/tomcat-9/v9.0.89/bin/apache-tomcat-9.0.89.tar.gz
-              tar -xzf apache-tomcat-9.0.89.tar.gz
-              chmod +x apache-tomcat-9.0.89/bin/*.sh
-              apache-tomcat-9.0.89/bin/startup.sh
+              apt install -y tomcat9 tomcat9-admin
+              systemctl start tomcat9
+              systemctl enable tomcat9
 
               # Install MySQL
-              yum install -y mysql-server
-              systemctl start mysqld
-              systemctl enable mysqld
+              apt install -y mysql-server
+              systemctl start mysql
+              systemctl enable mysql
               EOF
 
   tags = {
