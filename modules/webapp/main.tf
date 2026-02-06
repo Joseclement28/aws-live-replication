@@ -85,73 +85,31 @@ resource "aws_instance" "this" {
   vpc_security_group_ids       = [aws_security_group.this.id]
   associate_public_ip_address = true
 
- user_data = <<-EOF
-    #!/bin/bash
-    exec > /var/log/user-data.log 2>&1
-    set -x
+user_data = <<-EOF
+              #!/bin/bash
+              exec > /var/log/user-data.log 2>&1
+              set -xe
 
-    # Update system
-    apt update -y
+              apt update -y
+              apt install -y openjdk-11-jdk wget curl
 
-    # Install Java
-    apt install -y openjdk-11-jdk wget
+              cd /opt
+              wget https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.89/bin/apache-tomcat-9.0.89.tar.gz
+              tar -xzf apache-tomcat-9.0.89.tar.gz
+              chmod +x apache-tomcat-9.0.89/bin/*.sh
+              /opt/apache-tomcat-9.0.89/bin/startup.sh
 
-    # Create tomcat user
-    useradd -m -U -d /opt/tomcat -s /bin/false tomcat
-
-    # Download Tomcat
-    cd /tmp
-    wget https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.89/bin/apache-tomcat-9.0.89.tar.gz
-
-    # Install Tomcat
-    mkdir -p /opt/tomcat
-    tar -xzf apache-tomcat-9.0.89.tar.gz -C /opt/tomcat --strip-components=1
-
-    # Permissions
-    chown -R tomcat:tomcat /opt/tomcat
-    chmod +x /opt/tomcat/bin/*.sh
-
-    # Create systemd service
-    cat <<EOT > /etc/systemd/system/tomcat.service
-    [Unit]
-    Description=Apache Tomcat
-    After=network.target
-
-    [Service]
-    Type=forking
-    User=tomcat
-    Group=tomcat
-    Environment="JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64"
-    Environment="CATALINA_PID=/opt/tomcat/temp/tomcat.pid"
-    Environment="CATALINA_HOME=/opt/tomcat"
-    Environment="CATALINA_BASE=/opt/tomcat"
-    ExecStart=/opt/tomcat/bin/startup.sh
-    ExecStop=/opt/tomcat/bin/shutdown.sh
-    Restart=always
-
-    [Install]
-    WantedBy=multi-user.target
-    EOT
-
-# Reload and start Tomcat
-systemctl daemon-reexec
-systemctl daemon-reload
-systemctl enable tomcat
-systemctl start tomcat
-
-# Install MySQL
-apt install -y mysql-server
-systemctl enable mysql
-systemctl start mysql
-EOF
-
+              apt install -y mysql-server
+              systemctl enable mysql
+              systemctl start mysql
+              EOF
 
   tags = {
     Name = var.instance_name
   }
 }
 
-# 500GB EBS
+# 30GB EBS
 resource "aws_ebs_volume" "this" {
   availability_zone = aws_instance.this.availability_zone
   size              = var.ebs_size
